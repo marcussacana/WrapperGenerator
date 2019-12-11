@@ -39,6 +39,7 @@ namespace WrapperGenerator
             if (Dialog.ShowDialog() != DialogResult.OK)
                 return;
 
+            tbFilePath.Text = Dialog.FileName;
             BeginInvoke(new MethodInvoker(async () => await PostFileSelect(Dialog.FileName)));
         }
 

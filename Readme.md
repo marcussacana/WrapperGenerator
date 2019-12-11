@@ -58,7 +58,6 @@ namespace Wrapper
             dD3D10StateBlockMaskDisableAll = GetDelegate<tD3D10StateBlockMaskDisableAll>(RealHandler, "D3D10StateBlockMaskDisableAll", false);
             dD3D10StateBlockMaskGetSetting = GetDelegate<tD3D10StateBlockMaskGetSetting>(RealHandler, "D3D10StateBlockMaskGetSetting", false);
 
-            InitializeSRL();
         }
 
         [DllExport(CallingConvention = CallingConvention.StdCall)]
