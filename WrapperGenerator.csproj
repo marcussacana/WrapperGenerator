@@ -7,13 +7,4 @@
     <Platforms>AnyCPU;x86;x64</Platforms>
     <RunPostBuildEvent>Always</RunPostBuildEvent>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.DotNet.ILCompiler" Version="1.0.0-alpha-28407-01" />
-  </ItemGroup>
-
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="IF &quot;$(PlatformName)&quot;==&quot;x64&quot; (&#xD;&#xA;IF NOT EXIST tmp.tmp (&#xD;&#xA;echo tmp&gt;&gt;tmp.tmp&#xD;&#xA;dotnet publish -r win-$(PlatformName) -c $(ConfigurationName)&#xD;&#xA;)&#xD;&#xA;)&#xD;&#xA;del/q tmp.tmp" />
-  </Target>
-
 </Project>
