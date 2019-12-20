@@ -57,10 +57,19 @@ namespace WrapperGenerator
                     FuncInfo.Type = Line.Substring(0, Line.IndexOf("("));
                     if (FuncInfo.Calling == null)
                         continue;
+
                     FuncInfo.Name = FuncInfo.Type.Split(' ').Last();
                     FuncInfo.Type = FuncInfo.Type.Substring(0, FuncInfo.Type.LastIndexOf(" "));
 
+                    while (FuncInfo.Name.StartsWith("*")) {
+                        FuncInfo.Type += '*';
+                        FuncInfo.Name = FuncInfo.Name.Substring(1);
+                    }
+
                     FuncInfo.Arguments = ParseArguments(Line.Substring(Line.IndexOf("(")));
+
+                    if (string.IsNullOrWhiteSpace(FuncInfo.Name))
+                        continue;
 
                     Functions.Add(FuncInfo);
                 }
@@ -183,7 +192,7 @@ namespace WrapperGenerator
                     return CallingConvention.FastCall;
                 if (Type.ToLower().Contains("winapi"))
                     return CallingConvention.Winapi;
-                return null;
+                return CallingConvention.StdCall;
             }
         }
 

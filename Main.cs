@@ -43,6 +43,13 @@ namespace WrapperGenerator
             BeginInvoke(new MethodInvoker(async () => await PostFileSelect(Dialog.FileName)));
         }
 
+        private void ModeChanged(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(tbFilePath.Text) || !File.Exists(tbFilePath.Text))
+                return;
+            BeginInvoke(new MethodInvoker(async () => await PostFileSelect(tbFilePath.Text)));
+        }
+
         async Task PostFileSelect(string FileName)
         {
             IntPtr Handler = IntPtr.Zero;
@@ -65,7 +72,7 @@ namespace WrapperGenerator
             string[] Source = await File.ReadAllLinesAsync(FileName);
 
             SourceParser Parser = new SourceParser(Source);
-            var Functions = (from x in Parser.Parse() where !x.Name.StartsWith("sub_") select x).ToArray();
+            var Functions = (from x in Parser.Parse() where !x.Name.StartsWith("sub_") && !x.Name.StartsWith("SEH_") select x).ToArray();
 
             if (Handler != IntPtr.Zero)            
                 Functions = (from x in Functions where GetProcAddress(Handler, x.Name) != IntPtr.Zero select x).ToArray();

@@ -34,7 +34,6 @@ namespace WrapperGenerator
                 Builder.AppendLine();
             }
 
-            Builder.AppendLine();
             Builder.AppendLine("    }");
             Builder.AppendLine("}");
 

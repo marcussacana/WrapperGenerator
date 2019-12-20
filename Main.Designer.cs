@@ -65,6 +65,7 @@
             this.CBoxMode.Name = "CBoxMode";
             this.CBoxMode.Size = new System.Drawing.Size(632, 23);
             this.CBoxMode.TabIndex = 2;
+            this.CBoxMode.SelectedIndexChanged += new System.EventHandler(this.ModeChanged);
             // 
             // lblMode
             // 
@@ -82,11 +83,11 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tbCodeBox.Location = new System.Drawing.Point(12, 70);
             this.tbCodeBox.Multiline = true;
-            this.tbCodeBox.WordWrap = false;
-            this.tbCodeBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.tbCodeBox.Name = "tbCodeBox";
+            this.tbCodeBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.tbCodeBox.Size = new System.Drawing.Size(680, 426);
             this.tbCodeBox.TabIndex = 4;
+            this.tbCodeBox.WordWrap = false;
             // 
             // Main
             // 
