@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -130,10 +131,27 @@ namespace WrapperGenerator
                 }
             }
 
-            string[] ProgramFiles = Directory.GetDirectories(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles).Replace(" (x86)", ""));
-            string[] ProgramFilesx86 = Directory.GetDirectories(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86));
+            string X64ProgFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles).Replace(" (x86)", "");
+            string X86ProgFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
 
-            foreach (string Dir in ProgramFiles.Concat(ProgramFilesx86))
+            X64ProgFiles = X64ProgFiles.Substring(3);
+            X86ProgFiles = X86ProgFiles.Substring(3);
+
+            List<string> AllProgramFiles = new List<string>();
+
+            foreach (DriveInfo Drive in DriveInfo.GetDrives())
+            {
+                string ProgFilesPath = Path.Combine(Drive.RootDirectory.FullName, X64ProgFiles);
+                if (Directory.Exists(ProgFilesPath))
+                    AllProgramFiles.AddRange(Directory.GetDirectories(ProgFilesPath));
+
+
+                ProgFilesPath = Path.Combine(Drive.RootDirectory.FullName, X86ProgFiles);
+                if (Directory.Exists(ProgFilesPath))
+                    AllProgramFiles.AddRange(Directory.GetDirectories(ProgFilesPath));
+            }
+
+            foreach (string Dir in AllProgramFiles)
             {
                 foreach (string Name in Names)
                 {
