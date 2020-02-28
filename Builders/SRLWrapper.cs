@@ -33,7 +33,9 @@ namespace WrapperGenerator
             Builder.AppendLine("        {");
             Builder.AppendLine("            if (RealHandler != null)");
             Builder.AppendLine("                return;");
+            Builder.AppendLine();
             Builder.AppendLine("            RealHandler = LoadLibrary(CurrentDllName);");
+            Builder.AppendLine();
             Builder.AppendLine("            if (RealHandler == null)");
             Builder.AppendLine("                Environment.Exit(0x505);//ERROR_DELAY_LOAD_FAILED");
             

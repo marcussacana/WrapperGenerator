@@ -30,7 +30,9 @@ namespace WrapperGenerator
             Builder.AppendLine("        {");
             Builder.AppendLine("            if (RealHandler != IntPtr.Zero)");
             Builder.AppendLine("                return;");
+            Builder.AppendLine();
             Builder.AppendLine("            RealHandler = LoadLibrary(CurrentDllName);");
+            Builder.AppendLine();
             Builder.AppendLine("            if (RealHandler == IntPtr.Zero)");
             Builder.AppendLine("                Environment.Exit(0x505);//ERROR_DELAY_LOAD_FAILED");
 
@@ -84,10 +86,12 @@ namespace WrapperGenerator
             Builder.AppendLine("                }");
             Builder.AppendLine("            }");
             Builder.AppendLine("            RealDllPath = DllPath;");
-            Builder.AppendLine("            //System.Windows.Forms.MessageBox.Show(\"Mod: \" + DllPath);");
+            Builder.AppendLine();
             Builder.AppendLine("            IntPtr Handler = LoadLibraryW(DllPath);");
+            Builder.AppendLine();
             Builder.AppendLine("            if (Handler == IntPtr.Zero)");
             Builder.AppendLine("                Environment.Exit(0x505);//ERROR_DELAY_LOAD_FAILED");
+            Builder.AppendLine();
             Builder.AppendLine("            return Handler;");
             Builder.AppendLine("        }");
             Builder.AppendLine();

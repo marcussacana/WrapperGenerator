@@ -18,6 +18,7 @@ namespace WrapperGenerator
             StringBuilder Builder = new StringBuilder();
             Builder.AppendLine("using System;");
             Builder.AppendLine("using System.Runtime.InteropServices;");
+            Builder.AppendLine();
             Builder.AppendLine("namespace Wrapper");
             Builder.AppendLine("{");
             Builder.AppendLine("    /// <summary>");
