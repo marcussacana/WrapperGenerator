@@ -124,7 +124,7 @@ namespace WrapperGenerator
             {
                 Function tmp = Export;
                 tmp.Name = "t" + tmp.Name;
-                Builder.AppendLine($"        delegate {tmp.ToString()};");
+                Builder.AppendLine($"        delegate {tmp};");
             }
 
             Builder.AppendLine();

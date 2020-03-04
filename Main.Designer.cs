@@ -33,6 +33,8 @@
             this.CBoxMode = new System.Windows.Forms.ComboBox();
             this.lblMode = new System.Windows.Forms.Label();
             this.tbCodeBox = new System.Windows.Forms.TextBox();
+            this.lblRegex = new System.Windows.Forms.Label();
+            this.tbRegex = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // bntBrowser
@@ -57,13 +59,11 @@
             // 
             // CBoxMode
             // 
-            this.CBoxMode.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.CBoxMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.CBoxMode.FormattingEnabled = true;
             this.CBoxMode.Location = new System.Drawing.Point(59, 41);
             this.CBoxMode.Name = "CBoxMode";
-            this.CBoxMode.Size = new System.Drawing.Size(632, 23);
+            this.CBoxMode.Size = new System.Drawing.Size(268, 23);
             this.CBoxMode.TabIndex = 2;
             this.CBoxMode.SelectedIndexChanged += new System.EventHandler(this.ModeChanged);
             // 
@@ -89,11 +89,32 @@
             this.tbCodeBox.TabIndex = 4;
             this.tbCodeBox.WordWrap = false;
             // 
+            // lblRegex
+            // 
+            this.lblRegex.AutoSize = true;
+            this.lblRegex.Location = new System.Drawing.Point(333, 44);
+            this.lblRegex.Name = "lblRegex";
+            this.lblRegex.Size = new System.Drawing.Size(41, 15);
+            this.lblRegex.TabIndex = 3;
+            this.lblRegex.Text = "Regex:";
+            // 
+            // tbRegex
+            // 
+            this.tbRegex.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbRegex.Location = new System.Drawing.Point(380, 41);
+            this.tbRegex.Name = "tbRegex";
+            this.tbRegex.Size = new System.Drawing.Size(311, 23);
+            this.tbRegex.TabIndex = 1;
+            this.tbRegex.TextChanged += new System.EventHandler(this.RegexChanged);
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(704, 508);
+            this.Controls.Add(this.lblRegex);
+            this.Controls.Add(this.tbRegex);
             this.Controls.Add(this.tbCodeBox);
             this.Controls.Add(this.CBoxMode);
             this.Controls.Add(this.lblMode);
@@ -113,5 +134,7 @@
         private System.Windows.Forms.ComboBox CBoxMode;
         private System.Windows.Forms.Label lblMode;
         private System.Windows.Forms.TextBox tbCodeBox;
+        private System.Windows.Forms.Label lblRegex;
+        private System.Windows.Forms.TextBox tbRegex;
     }
 }

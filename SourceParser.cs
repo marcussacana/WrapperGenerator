@@ -45,6 +45,8 @@ namespace WrapperGenerator
                     continue;
                 if (Line.StartsWith("#"))
                     continue;
+                if (Line.StartsWith("&& ") || Line.StartsWith("|| "))
+                    continue;
                 if (Line.EndsWith(",") && (!Line.Contains(" ") || Line.Contains("\"")))
                     continue;
                 if (Line.Contains("="))
@@ -144,6 +146,7 @@ namespace WrapperGenerator
 
     struct Function
     {
+        public bool Unsafe;
         public bool AnonType;
         public int Line;
         public string Type;
@@ -166,7 +169,7 @@ namespace WrapperGenerator
                         return "uint";
                 }
 
-                return "IntPtr";
+                return Unsafe ? "void*" : "IntPtr";
             }
         }
 
@@ -196,6 +199,18 @@ namespace WrapperGenerator
             }
         }
 
+        public string Charset {
+            get
+            {
+                string Charset = "Auto";
+                if (Name.EndsWith("A"))
+                    Charset = "Ansi";
+                if (Name.EndsWith("W"))
+                    Charset = "Unicode";
+                return Charset;
+            }
+        }
+
         public Argument[] Arguments;
 
         public override string ToString()
@@ -207,12 +222,13 @@ namespace WrapperGenerator
             }
 
             Args = Args.TrimEnd(' ', ',');
-            return $"{ReturnType} {Name}({Args})";
+            return (Unsafe ? "unsafe " : "") + $"{ReturnType} {Name}({Args})";
         }
     }
 
     struct Argument
     {
+        public bool Unsafe;
         public bool AnonType;
 
         public string Name;
@@ -231,7 +247,8 @@ namespace WrapperGenerator
                     if (Type.ToLower().Contains("dword"))
                         return "uint";
                 }
-                return "IntPtr";
+
+                return Unsafe ? "void*" : "IntPtr";
             }
         }
     }

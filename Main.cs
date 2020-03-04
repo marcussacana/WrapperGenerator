@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -50,6 +51,12 @@ namespace WrapperGenerator
                 return;
             BeginInvoke(new MethodInvoker(async () => await PostFileSelect(tbFilePath.Text)));
         }
+        private void RegexChanged(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(tbFilePath.Text) || !File.Exists(tbFilePath.Text))
+                return;
+            BeginInvoke(new MethodInvoker(async () => await PostFileSelect(tbFilePath.Text)));
+        }
 
         async Task PostFileSelect(string FileName)
         {
@@ -73,11 +80,22 @@ namespace WrapperGenerator
             string[] Source = await File.ReadAllLinesAsync(FileName);
 
             SourceParser Parser = new SourceParser(Source);
-            var Functions = (from x in Parser.Parse() where !x.Name.StartsWith("sub_") && !x.Name.StartsWith("SEH_") select x).ToArray();
+            var Functions = (from x in Parser.Parse() where
+                                   !x.Name.StartsWith("sub_") &&
+                                   !x.Name.StartsWith("SEH_")
+                             select x).ToArray();
 
             if (Handler != IntPtr.Zero)            
-                Functions = (from x in Functions where GetProcAddress(Handler, x.Name) != IntPtr.Zero select x).ToArray();
-            
+                Functions = (from x in Functions where 
+                                   GetProcAddress(Handler, x.Name) != IntPtr.Zero
+                             select x).ToArray();
+
+            if (tbRegex.Text.Trim() != string.Empty && IsValidRegex(tbRegex.Text))
+                Functions = (from x in Functions where
+                                   Regex.IsMatch(x.Name, tbRegex.Text) ||
+                                   Regex.IsMatch(x.ToString(), tbRegex.Text)
+                             select x).ToArray();
+
             var Builder = CurrentBuilder;
 
             tbCodeBox.Text = Builder.BuildWrapper(Path.GetFileNameWithoutExtension(FileName), Functions);
@@ -164,7 +182,21 @@ namespace WrapperGenerator
 
             return null;
         }
+        private static bool IsValidRegex(string pattern)
+        {
+            if (string.IsNullOrEmpty(pattern)) return false;
 
+            try
+            {
+                Regex.Match("", pattern);
+            }
+            catch (ArgumentException)
+            {
+                return false;
+            }
+
+            return true;
+        }
         [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Unicode)]
         static extern IntPtr LoadLibraryW(string FileName);
         
