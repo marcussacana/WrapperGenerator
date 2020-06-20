@@ -13,6 +13,7 @@ namespace WrapperGenerator
             StringBuilder Builder = new StringBuilder();
             Builder.AppendLine("using System;");
             Builder.AppendLine("using System.IO;");
+            Builder.AppendLine("using System.Reflection;");
             Builder.AppendLine("using System.Runtime.InteropServices;");
             Builder.AppendLine();
             Builder.AppendLine("namespace Wrapper");
@@ -100,7 +101,7 @@ namespace WrapperGenerator
             Builder.AppendLine();
             Builder.AppendLine("        internal static T GetDelegate<T>(void* Handler, string Function, bool Optional = true) where T : Delegate");
             Builder.AppendLine("        {");
-            Builder.AppendLine("            IntPtr Address = GetProcAddress(Handler, Function);");
+            Builder.AppendLine("            void* Address = GetProcAddress(Handler, Function);");
             Builder.AppendLine("            if (Address == null)");
             Builder.AppendLine("            {");
             Builder.AppendLine("                if (Optional)");
@@ -127,7 +128,7 @@ namespace WrapperGenerator
             {
                 Function tmp = Export;
                 tmp.Name = "t" + tmp.Name;
-                Builder.AppendLine($"        delegate {tmp};");
+                Builder.AppendLine($"        delegate {tmp};".Replace("delegate unsafe", "unsafe delegate"));
             }
 
             Builder.AppendLine();
