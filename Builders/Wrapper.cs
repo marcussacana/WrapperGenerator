@@ -8,12 +8,7 @@ namespace WrapperGenerator
 
         public string BuildWrapper(string Name, Function[] Exports)
         {
-            for (int i = 0; i < Exports.Length; i++) {
-                Exports[i].AnonType = true;
-                for (int x = 0; x < Exports[i].Arguments.Length; x++) {
-                    Exports[i].Arguments[x].AnonType = true;
-                }
-            }
+            Exports.SetAnonType(true);
 
             StringBuilder Builder = new StringBuilder();
             Builder.AppendLine("using System;");
@@ -30,8 +25,8 @@ namespace WrapperGenerator
 
             foreach (Function Export in Exports)
             {
-                Builder.AppendLine($"        [DllImport(CallingConvention = CallingConvention.{Export.Calling})]");
-                Builder.AppendLine($"        public static extern {Export.ToString()};");
+                Builder.AppendLine($"        [DllImport(\"{Name.Trim().Replace(" ", "")}.dll\", CallingConvention = CallingConvention.{Export.Calling})]");
+                Builder.AppendLine($"        public static extern {Export};");
                 Builder.AppendLine();
             }
 

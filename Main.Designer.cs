@@ -85,7 +85,7 @@
             this.tbCodeBox.Multiline = true;
             this.tbCodeBox.Name = "tbCodeBox";
             this.tbCodeBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.tbCodeBox.Size = new System.Drawing.Size(680, 426);
+            this.tbCodeBox.Size = new System.Drawing.Size(680, 420);
             this.tbCodeBox.TabIndex = 4;
             this.tbCodeBox.WordWrap = false;
             // 
@@ -112,7 +112,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(704, 508);
+            this.ClientSize = new System.Drawing.Size(704, 502);
             this.Controls.Add(this.lblRegex);
             this.Controls.Add(this.tbRegex);
             this.Controls.Add(this.tbCodeBox);
@@ -120,6 +120,7 @@
             this.Controls.Add(this.lblMode);
             this.Controls.Add(this.tbFilePath);
             this.Controls.Add(this.bntBrowser);
+            this.MinimumSize = new System.Drawing.Size(720, 540);
             this.Name = "Main";
             this.Text = "WrapperGenerator";
             this.ResumeLayout(false);

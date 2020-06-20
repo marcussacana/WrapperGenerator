@@ -2,16 +2,17 @@
 
 namespace WrapperGenerator
 {
-    class PortableWrapper : IWrapperBuilder
+    class PortableWrapperUnsafe : IWrapperBuilder
     {
-        public string Name => "Portable Wrapper";
+        public string Name => "Portable Wrapper Unsafe";
 
         public string BuildWrapper(string Name, Function[] Exports)
         {
+            Exports.SetUnsafeMode(true);
+
             StringBuilder Builder = new StringBuilder();
             Builder.AppendLine("using System;");
             Builder.AppendLine("using System.IO;");
-            Builder.AppendLine("using System.Reflection;");
             Builder.AppendLine("using System.Runtime.InteropServices;");
             Builder.AppendLine();
             Builder.AppendLine("namespace Wrapper");
@@ -19,7 +20,7 @@ namespace WrapperGenerator
             Builder.AppendLine("    /// <summary>");
             Builder.AppendLine($"    /// This is a wrapper to the {Name}.dll");
             Builder.AppendLine("    /// </summary>");
-            Builder.AppendLine($"    public static class {Name.Trim().Replace(" ", "")}");
+            Builder.AppendLine($"    public unsafe static class {Name.Trim().Replace(" ", "")}");
             Builder.AppendLine("    {");
             Builder.AppendLine();
             Builder.AppendLine("        static string CurrentDllName = Path.GetFileName(Assembly.GetExecutingAssembly().Location);");
@@ -27,15 +28,15 @@ namespace WrapperGenerator
             Builder.AppendLine("        static string RealDllPath  = null;");
             Builder.AppendLine("        static bool WOW64 => !Environment.Is64BitProcess && Environment.Is64BitOperatingSystem;");
             Builder.AppendLine();
-            Builder.AppendLine("        public static IntPtr RealHandler;");
+            Builder.AppendLine("        public static void* RealHandler;");
             Builder.AppendLine($"        static {Name.Trim().Replace(" ", "")}()");
             Builder.AppendLine("        {");
-            Builder.AppendLine("            if (RealHandler != IntPtr.Zero)");
+            Builder.AppendLine("            if (RealHandler != null)");
             Builder.AppendLine("                return;");
             Builder.AppendLine();
             Builder.AppendLine("            RealHandler = LoadLibrary(CurrentDllName);");
             Builder.AppendLine();
-            Builder.AppendLine("            if (RealHandler == IntPtr.Zero)");
+            Builder.AppendLine("            if (RealHandler == null)");
             Builder.AppendLine("                Environment.Exit(0x505);//ERROR_DELAY_LOAD_FAILED");
 
             Builder.AppendLine();
@@ -63,12 +64,12 @@ namespace WrapperGenerator
 
 
             Builder.AppendLine("        [DllImport(\"kernel32\", CharSet = CharSet.Ansi, ExactSpelling = true, SetLastError = true)]");
-            Builder.AppendLine("        internal static extern IntPtr GetProcAddress(IntPtr hModule, string procName);");
+            Builder.AppendLine("        internal static extern void* GetProcAddress(void* hModule, string procName);");
             Builder.AppendLine();
             Builder.AppendLine("        [DllImport(\"kernel32\", SetLastError = true, CharSet = CharSet.Unicode)]");
-            Builder.AppendLine("        internal static extern IntPtr LoadLibraryW(string lpFileName);");
+            Builder.AppendLine("        internal static extern void* LoadLibraryW(string lpFileName);");
             Builder.AppendLine();
-            Builder.AppendLine("        internal static IntPtr LoadLibrary(string lpFileName)");
+            Builder.AppendLine("        internal static void* LoadLibrary(string lpFileName)");
             Builder.AppendLine("        {");
             Builder.AppendLine("            string DllPath = lpFileName;");
             Builder.AppendLine("            if (lpFileName.Length < 2 || lpFileName[1] != ':')");
@@ -89,18 +90,18 @@ namespace WrapperGenerator
             Builder.AppendLine("            }");
             Builder.AppendLine("            RealDllPath = DllPath;");
             Builder.AppendLine();
-            Builder.AppendLine("            IntPtr Handler = LoadLibraryW(DllPath);");
+            Builder.AppendLine("            void* Handler = LoadLibraryW(DllPath);");
             Builder.AppendLine();
-            Builder.AppendLine("            if (Handler == IntPtr.Zero)");
+            Builder.AppendLine("            if (Handler == null)");
             Builder.AppendLine("                Environment.Exit(0x505);//ERROR_DELAY_LOAD_FAILED");
             Builder.AppendLine();
             Builder.AppendLine("            return Handler;");
             Builder.AppendLine("        }");
             Builder.AppendLine();
-            Builder.AppendLine("        internal static T GetDelegate<T>(IntPtr Handler, string Function, bool Optional = true) where T : Delegate");
+            Builder.AppendLine("        internal static T GetDelegate<T>(void* Handler, string Function, bool Optional = true) where T : Delegate");
             Builder.AppendLine("        {");
             Builder.AppendLine("            IntPtr Address = GetProcAddress(Handler, Function);");
-            Builder.AppendLine("            if (Address == IntPtr.Zero)");
+            Builder.AppendLine("            if (Address == null)");
             Builder.AppendLine("            {");
             Builder.AppendLine("                if (Optional)");
             Builder.AppendLine("                {");
@@ -108,7 +109,7 @@ namespace WrapperGenerator
             Builder.AppendLine("                }");
             Builder.AppendLine("                Environment.Exit(0x505);//ERROR_DELAY_LOAD_FAILED");
             Builder.AppendLine("            }");
-            Builder.AppendLine("            return (T)Marshal.GetDelegateForFunctionPointer(Address, typeof(T));");
+            Builder.AppendLine("            return (T)Marshal.GetDelegateForFunctionPointer(new IntPtr(Address), typeof(T));");
             Builder.AppendLine("        }");
 
             Builder.AppendLine();

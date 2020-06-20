@@ -10,15 +10,7 @@ namespace WrapperGenerator.Builders
 
         public string BuildWrapper(string Name, Function[] Exports)
         {
-            for (int i = 0; i < Exports.Length; i++) {
-                Exports[i].AnonType = true;
-                Exports[i].Unsafe = true;
-                for (int x = 0; x < Exports[i].Arguments.Length; x++)
-                {
-                    Exports[i].Arguments[x].Unsafe = true;
-                    Exports[i].Arguments[x].AnonType = true;
-                }
-            }
+            Exports.SetUnsafeMode(true);
 
             StringBuilder Builder = new StringBuilder();
             Builder.AppendLine("namespace StringReloads.Hook");
@@ -34,7 +26,8 @@ namespace WrapperGenerator.Builders
                 Builder.AppendLine();
                 Builder.AppendLine("        public override void Initialize()");
                 Builder.AppendLine("        {");
-                
+
+                var Return = Export.ReturnType != "void" ? "return " : "";
                 string ExportName = Export.Name;                
                 Export.Name += "Hook";
                 Builder.AppendLine($"            HookDelegate = new {Export.Name}Delegate({Export.Name});");
@@ -43,7 +36,7 @@ namespace WrapperGenerator.Builders
                 Builder.AppendLine();
                 Builder.AppendLine($"        private {Export}");
                 Builder.AppendLine("        {");
-                Builder.AppendLine($"            return Bypass({Export.ArgumentNames});");
+                Builder.AppendLine($"            {Return}Bypass({Export.ArgumentNames});");
                 Builder.AppendLine("        }");
                 Builder.AppendLine();                
                 Export.Name = ExportName;

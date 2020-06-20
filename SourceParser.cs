@@ -34,7 +34,7 @@ namespace WrapperGenerator
                     Commented = true;
                     Line = Line.Substring(0, Line.IndexOf("/*")).Trim();
                 }
-                
+
                 if (Line.Contains("//"))
                     Line = Line.Substring(0, Line.IndexOf("//")).Trim();
                 if (string.IsNullOrWhiteSpace(Line))
@@ -63,10 +63,14 @@ namespace WrapperGenerator
                     FuncInfo.Name = FuncInfo.Type.Split(' ').Last();
                     FuncInfo.Type = FuncInfo.Type.Substring(0, FuncInfo.Type.LastIndexOf(" "));
 
-                    while (FuncInfo.Name.StartsWith("*")) {
+                    while (FuncInfo.Name.StartsWith("*"))
+                    {
                         FuncInfo.Type += '*';
                         FuncInfo.Name = FuncInfo.Name.Substring(1);
                     }
+
+                    if (FuncInfo.Name.Contains("@<"))
+                        FuncInfo.Name = FuncInfo.Name.Substring(0, FuncInfo.Name.IndexOf("@<"));
 
                     FuncInfo.Arguments = ParseArguments(Line.Substring(Line.IndexOf("(")));
 
@@ -75,7 +79,8 @@ namespace WrapperGenerator
 
                     Functions.Add(FuncInfo);
                 }
-                catch {
+                catch
+                {
                     continue;
                 }
             }
@@ -85,6 +90,9 @@ namespace WrapperGenerator
 
         private Argument[] ParseArguments(string Source)
         {
+            //(__int64 (***a1)(void))
+            //(__int64 (__fastcall ***a1)(_QWORD, signed __int64))
+            //(__int64 a1@<rdx>, __int64 a2@<rcx>, float *a3@<r8>, double a4@<xmm0>)
             //(int this, LPVOID lpBuffer, int a3, int a4, LPDWORD lpNumberOfBytesRead)
             if (Source.StartsWith("(") && Source.EndsWith(")"))
                 Source = Source.Substring(1, Source.Length - 2);
@@ -98,6 +106,8 @@ namespace WrapperGenerator
                 switch (c)
                 {
                     case ' ':
+                        if (Group != 0)
+                            goto default;
                         Arg.Type += Buffer + c;
                         Buffer = string.Empty;
                         break;
@@ -115,7 +125,8 @@ namespace WrapperGenerator
                     case ')':
                         Group--;
                         goto default;
-                    default:;
+                    default:
+                        ;
                         Buffer += c;
                         break;
                 }
@@ -133,14 +144,25 @@ namespace WrapperGenerator
 
         private void CloseArg(ref Argument Arg, string Buffer)
         {
-                Arg.Type = Arg.Type.Trim();
-                Arg.Name = Buffer;
+            Arg.Type = Arg.Type.Trim();
+            Arg.Name = Buffer;
 
-            while (Arg.Name.StartsWith('*'))
+            if (Arg.Name.Contains(")("))//Func Argument
+            {
+                Arg.Type = "void*";
+                Arg.Name = Arg.Name.Substring(0, Arg.Name.IndexOf(")("));
+                Arg.Name = Arg.Name.Substring(Arg.Name.LastIndexOf("(") + 1);//__fastcall ***a1
+                Arg.Name = Arg.Name.Split(' ').Last();
+            }
+
+            while (Arg.Name.StartsWith('*'))//Ptr Argument
             {
                 Arg.Type += '*';
                 Arg.Name = Arg.Name.Substring(1);
             }
+
+            if (Arg.Name.Contains("@<"))//FastCall Register
+                Arg.Name = Arg.Name.Substring(0, Arg.Name.IndexOf("@<"));
         }
     }
 
@@ -152,8 +174,10 @@ namespace WrapperGenerator
         public string Type;
         public string Name;
 
-        public string ReturnType { 
-            get {
+        public string ReturnType
+        {
+            get
+            {
                 if (Type.ToLower().Contains("void"))
                     return "void";
 
@@ -173,8 +197,10 @@ namespace WrapperGenerator
             }
         }
 
-        public string ArgumentNames { 
-            get {
+        public string ArgumentNames
+        {
+            get
+            {
                 var Str = string.Empty;
                 foreach (var Arg in Arguments)
                 {
@@ -183,8 +209,10 @@ namespace WrapperGenerator
                 return Str.TrimEnd(' ', ',');
             }
         }
-        public CallingConvention? Calling {
-            get {
+        public CallingConvention? Calling
+        {
+            get
+            {
                 if (Type.ToLower().Contains("stdcall"))
                     return CallingConvention.StdCall;
                 if (Type.ToLower().Contains("cdecl"))
@@ -199,7 +227,8 @@ namespace WrapperGenerator
             }
         }
 
-        public string Charset {
+        public string Charset
+        {
             get
             {
                 string Charset = "Auto";
@@ -234,8 +263,10 @@ namespace WrapperGenerator
         public string Name;
         public string Type;
 
-        public string ReturnType {
-            get {
+        public string ReturnType
+        {
+            get
+            {
                 if (!AnonType)
                 {
                     if (Type.ToLower().Contains("bool"))

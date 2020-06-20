@@ -8,12 +8,7 @@ namespace WrapperGenerator
 
         public string BuildWrapper(string Name, Function[] Exports)
         {
-            for (int i = 0; i < Exports.Length; i++) {
-                Exports[i].AnonType = true;
-                for (int x = 0; x < Exports[i].Arguments.Length; x++) {
-                    Exports[i].Arguments[x].AnonType = true;
-                }
-            }
+            Exports.SetAnonType(true);
 
             StringBuilder Builder = new StringBuilder();
             Builder.AppendLine("using System;");
@@ -29,7 +24,7 @@ namespace WrapperGenerator
             Builder.AppendLine($"    public unsafe static class {Name.Trim().Replace(" ", "")}");
             Builder.AppendLine("    {");
             Builder.AppendLine("        public static void* RealHandler;");
-            Builder.AppendLine("        public static void LoadRetail()");
+            Builder.AppendLine($"        public static {Name.Trim().Replace(" ", "")}()");
             Builder.AppendLine("        {");
             Builder.AppendLine("            if (RealHandler != null)");
             Builder.AppendLine("                return;");
@@ -53,11 +48,11 @@ namespace WrapperGenerator
 
             foreach (Function Export in Exports)
             {
+                var Return = Export.ReturnType != "void" ? "return " : "";
                 Builder.AppendLine($"        [DllExport(CallingConvention = CallingConvention.{Export.Calling})]");
-                Builder.AppendLine($"        public static {Export.ToString()}");
+                Builder.AppendLine($"        public static {Export}");
                 Builder.AppendLine("        {");
-                Builder.AppendLine("            LoadRetail();");
-                Builder.AppendLine($"            return d{Export.Name}({Export.ArgumentNames});");
+                Builder.AppendLine($"            {Return}d{Export.Name}({Export.ArgumentNames});");
                 Builder.AppendLine("        }");
                 Builder.AppendLine();
             }
