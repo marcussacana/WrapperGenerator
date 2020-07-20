@@ -128,6 +128,7 @@ namespace WrapperGenerator
             {
                 Function tmp = Export;
                 tmp.Name = "t" + tmp.Name;
+                Builder.AppendLine($"        [UnmanagedFunctionPointer(CallingConvention.{Export.Calling}, CharSet = CharSet.{Export.Charset})]");
                 Builder.AppendLine($"        delegate {tmp};".Replace("delegate unsafe", "unsafe delegate"));
             }
 

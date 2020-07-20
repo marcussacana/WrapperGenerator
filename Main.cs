@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 
 namespace WrapperGenerator
 {
@@ -58,6 +59,7 @@ namespace WrapperGenerator
             BeginInvoke(new MethodInvoker(async () => await PostFileSelect(tbFilePath.Text)));
         }
 
+        string LastFile;
         async Task PostFileSelect(string FileName)
         {
             IntPtr Handler = IntPtr.Zero;
@@ -65,9 +67,10 @@ namespace WrapperGenerator
             {
                 Handler = LoadLibraryW(FileName);
                 
-                if (Marshal.GetLastWin32Error() == 0x000000c1)
+                if (Marshal.GetLastWin32Error() == 0x000000c1 && LastFile != FileName)
                     MessageBox.Show("This Library isn't to the current architeture of the WrapperGenerator instance.", "WrapperGenerator", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 
+                LastFile = FileName;
                 FileName = await Decompile(FileName);
             }
 

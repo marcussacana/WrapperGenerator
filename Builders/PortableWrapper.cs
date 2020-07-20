@@ -125,7 +125,8 @@ namespace WrapperGenerator
             foreach (Function Export in Exports)
             {
                 Function tmp = Export;
-                tmp.Name = "t" + tmp.Name;
+                tmp.Name = "t" + tmp.Name; 
+                Builder.AppendLine($"        [UnmanagedFunctionPointer(CallingConvention.{Export.Calling}, CharSet = CharSet.{Export.Charset})]");
                 Builder.AppendLine($"        delegate {tmp};");
             }
 
