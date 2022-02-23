@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 
@@ -85,7 +86,24 @@ namespace WrapperGenerator
                 }
             }
 
-            return Functions.ToArray();
+            List<Function> Additionals = new List<Function>();
+            foreach (var Function in Functions)
+            {
+                if (Function.Name.Contains("Stub") && !Functions.Where(x => Function.Name.Replace("Stub", "") == x.Name).Any())
+                {
+                    Additionals.Add(new Function()
+                    {
+                        AnonType =  Function.AnonType,
+                        Arguments =  Function.Arguments,
+                        Line =  Function.Line,
+                        Name =  Function.Name.Replace("Stub", ""),
+                        Type =  Function.Type,
+                        Unsafe =  Function.Unsafe
+                    });
+                }
+            }
+
+            return Functions.Concat(Additionals).ToArray();
         }
 
         private Argument[] ParseArguments(string Source)

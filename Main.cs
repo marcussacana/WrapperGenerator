@@ -63,8 +63,11 @@ namespace WrapperGenerator
         async Task PostFileSelect(string FileName)
         {
             IntPtr Handler = IntPtr.Zero;
+            string[] Symbols = new string[0];
+            
             if (Path.GetExtension(FileName).ToLower() == ".dll")
             {
+                Symbols = GetExports(FileName);
                 Handler = LoadLibraryW(FileName);
                 
                 if (Marshal.GetLastWin32Error() == 0x000000c1 && LastFile != FileName)
@@ -88,9 +91,10 @@ namespace WrapperGenerator
                                    !x.Name.StartsWith("SEH_")
                              select x).ToArray();
 
+            
             if (Handler != IntPtr.Zero)            
                 Functions = (from x in Functions where 
-                                   GetProcAddress(Handler, x.Name) != IntPtr.Zero
+                                   GetProcAddress(Handler, x.Name) != IntPtr.Zero || Symbols.Where(z => z.Equals(x.Name, StringComparison.InvariantCultureIgnoreCase)).Any()
                              select x).ToArray();
 
             if (tbRegex.Text.Trim() != string.Empty && IsValidRegex(tbRegex.Text))
@@ -185,6 +189,7 @@ namespace WrapperGenerator
 
             return null;
         }
+        
         private static bool IsValidRegex(string pattern)
         {
             if (string.IsNullOrEmpty(pattern)) return false;
@@ -200,10 +205,70 @@ namespace WrapperGenerator
 
             return true;
         }
+
+        private static string[] GetExports(string Module)
+        {
+            IntPtr hCurrentProcess = Process.GetCurrentProcess().Handle;
+
+            ulong baseOfDll;
+            bool status;
+
+            // Initialize sym.
+            // Please read the remarks on MSDN for the hProcess
+            // parameter.
+            status = SymInitialize(hCurrentProcess, null, false);
+
+            if (status == false)
+            {
+                return null;
+            }
+            
+            baseOfDll = SymLoadModuleEx(hCurrentProcess,IntPtr.Zero, Module, null, 0, 0, IntPtr.Zero, 0);
+
+            if (baseOfDll == 0)
+            {
+                Console.Out.WriteLine("Failed to load module.");
+                SymCleanup(hCurrentProcess);
+                return null;
+            }
+
+            List<string> Exports = new List<string>();
+            // Enumerate symbols. For every symbol the 
+            // callback method EnumSyms is called.
+            SymEnumerateSymbols64(hCurrentProcess, baseOfDll, (Name, Addr, Size, Context) =>
+            {
+                Exports.Add(Name);
+                return true;
+            }, IntPtr.Zero);
+
+            // Cleanup.
+            SymCleanup(hCurrentProcess);
+
+            return Exports.ToArray();
+        }
         [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Unicode)]
         static extern IntPtr LoadLibraryW(string FileName);
         
         [DllImport("kernel32", CharSet = CharSet.Ansi, ExactSpelling = true, SetLastError = true)]
         static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
+        
+        [DllImport("dbghelp.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool SymInitialize(IntPtr hProcess, string UserSearchPath, [MarshalAs(UnmanagedType.Bool)]bool fInvadeProcess);
+
+        [DllImport("dbghelp.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool SymCleanup(IntPtr hProcess);
+
+        [DllImport("dbghelp.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern ulong SymLoadModuleEx(IntPtr hProcess, IntPtr hFile,
+            string ImageName, string ModuleName, long BaseOfDll, int DllSize, IntPtr Data, int Flags);
+
+        [DllImport("dbghelp.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool SymEnumerateSymbols64(IntPtr hProcess, ulong BaseOfDll, SymEnumerateSymbolsProc64Delegate EnumSymbolsCallback, IntPtr UserContext);
+
+        //[UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        public delegate bool SymEnumerateSymbolsProc64Delegate(string SymbolName, ulong SymbolAddress, uint SymbolSize, IntPtr UserContext);
     }
 }
