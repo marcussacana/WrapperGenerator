@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 
@@ -40,8 +41,13 @@ namespace WrapperGenerator
                     Line = Line.Substring(0, Line.IndexOf("//")).Trim();
                 if (string.IsNullOrWhiteSpace(Line))
                     continue;
-                if (Line.EndsWith(";"))
+                
+                if (Line.EndsWith(";") && !(Line.Contains("__stdcall") || Line.Contains("__fastcall") || Line.Contains("__thiscall")))
                     continue;
+
+                if (Line.EndsWith(";"))
+                    Line = Line.Substring(0, Line.Length - 1);
+                
                 if (!Line.Contains("(") || !Line.EndsWith(")"))
                     continue;
                 if (Line.StartsWith("#"))
@@ -103,7 +109,7 @@ namespace WrapperGenerator
                 }
             }
 
-            return Functions.Concat(Additionals).ToArray();
+            return Functions.Concat(Additionals).GroupBy(x=>x.Name).Select(grp => grp.First()).ToArray();
         }
 
         private Argument[] ParseArguments(string Source)
